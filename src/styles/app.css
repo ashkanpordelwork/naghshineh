@@ -565,3 +565,20 @@ img { -webkit-user-drag: none; user-select: none; }
 }
 /* desktop sheet: buttons hug their content and sit on the left (Figma 342:17808) */
 .desk-map-col .hint-card { flex-direction: row-reverse; }
+
+/* breadcrumb = the single back control on the library page */
+.crumb {
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px 7px 14px; border-radius: 99px;
+  background: rgba(27, 34, 48, 0.7); border: 1px solid var(--line-2);
+  transition: transform 0.12s var(--ease-out), background 0.15s, border-color 0.15s;
+}
+.crumb:hover { background: rgba(37, 46, 64, 0.85); border-color: rgba(61, 220, 255, 0.45); }
+.crumb:active { transform: scale(0.97); }
+.crumb .crumb-back {
+  width: 26px; height: 26px; padding: 5px; border-radius: 99px; background: rgba(61, 220, 255, 0.14);
+  margin-inline-end: 2px; transition: transform 0.15s var(--ease-out);
+}
+.crumb:hover .crumb-back { transform: translateX(2px); }
+.crumb .school { font-weight: 900; font-size: 12px; color: var(--cyan-light); }
+.crumb .slash { font-weight: 700; font-size: 12px; color: rgba(255, 255, 255, 0.3); }
+.crumb .here { font-weight: 700; font-size: 12px; color: var(--muted); }

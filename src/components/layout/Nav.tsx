@@ -41,11 +41,12 @@ export function BottomNav({ section, active }: { section: Section; active: NavKe
 }
 
 /** Desktop header with the same tabs (≥768px). */
-export function TopNav({ section, active }: { section: Section; active: NavKey }) {
+export function TopNav({ section, active, noTabs = false }: { section: Section; active: NavKey; noTabs?: boolean }) {
   const go = useGo();
   return (
     <header className="top-nav" data-testid="top-nav">
       <UserBlock />
+      {!noTabs && (
       <nav className="top-tabs" aria-label="منوی اصلی">
         {itemsFor(section).map((it) => {
           const on = it.key === active;
@@ -60,6 +61,7 @@ export function TopNav({ section, active }: { section: Section; active: NavKey }
           );
         })}
       </nav>
+      )}
       <Chips />
     </header>
   );

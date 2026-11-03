@@ -17,6 +17,8 @@ export interface NavState {
 }
 
 interface Props {
+  /** hide the section navigation (school map has none) */
+  noNav?: boolean;
   world: World;
   section: Section;
   nav: NavKey;
@@ -38,7 +40,7 @@ export function selectedCam(world: World, p: Place, desktop: boolean): Cam {
   return { x: p.lot.x + p.lot.w / 2, y: p.lot.y + p.lot.h / 2 + (desktop ? world.selectOffset.desktop : world.selectOffset.mobile), s: base.s };
 }
 
-export function MapScreen({ world, section, nav, header, footer, onDirectEnter, onEnter, startCam, topFade, controlsLift = 0 }: Props) {
+export function MapScreen({ world, section, nav, header, footer, onDirectEnter, onEnter, startCam, topFade, controlsLift = 0, noNav = false }: Props) {
   const desktop = useIsDesktop();
   const reduce = useReducedMotion();
   const navigate = useNavigate();
@@ -113,8 +115,9 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
 
   const locate = () => mapRef.current?.flyTo(selected ? selectedCam(world, selected, desktop) : baseCam);
 
-  const sheetStyle: React.CSSProperties = desktop ? { left: 16, right: 16, bottom: 16 } : { left: 8, right: 8, bottom: 'calc(110px + var(--safe-b))' };
-  const ctrlBottom = desktop ? 20 : 100 + controlsLift;
+  const navSpace = noNav ? 0 : 84; // room taken by the mobile bottom nav
+  const sheetStyle: React.CSSProperties = desktop ? { left: 16, right: 16, bottom: 16 } : { left: 8, right: 8, bottom: `calc(${navSpace + (noNav ? 12 : 26)}px + var(--safe-b))` };
+  const ctrlBottom = desktop ? 20 : navSpace + 16 + controlsLift;
 
   const mapUi = (
     <>
@@ -139,7 +142,7 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
                     </Appear>
                   </div>
                   {footer && (
-                    <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', bottom: desktop ? 76 : 'calc(98px + var(--safe-b))', pointerEvents: 'none' }}>
+                    <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', bottom: desktop ? 76 : `calc(${navSpace + 14}px + var(--safe-b))`, pointerEvents: 'none' }}>
                       <Appear from="up" delay={0.45} style={{ pointerEvents: 'auto' }}>
                         {footer}
                       </Appear>
@@ -172,7 +175,7 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
       {desktop ? (
         <>
           <div className="map-glow" style={{ left: -144, width: 1728, top: 135, height: 540 }} />
-          <TopNav section={section} active={nav} />
+          <TopNav section={section} active={nav} noTabs={noNav} />
           <div className="desk-map-col">{mapUi}</div>
         </>
       ) : (
@@ -181,7 +184,7 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
             <TopBar />
           </div>
-          <BottomNav section={section} active={nav} />
+          {!noNav && <BottomNav section={section} active={nav} />}
         </>
       )}
     </Page>

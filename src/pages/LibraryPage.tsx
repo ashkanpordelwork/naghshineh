@@ -66,19 +66,20 @@ export function LibraryPage() {
   const body = (
     <Stagger className="lib-body" delay={0.08} gap={0.07}>
       <Item>
-        <button className="back-pill" onClick={backToMap} data-testid="back-pill">
-          <img src={icon('mapPill')} width={16} height={16} alt="" />
-          <span className="school">{schoolInfo.name}</span>
-          <span className="sep" />
-          <span className="back">بازگشت به نقشه</span>
-          <img src={icon('backPill')} width={14} height={14} alt="" style={{ transform: 'scaleX(-1)' }} />
-        </button>
+        <nav aria-label="مسیر">
+          <button className="crumb" onClick={backToMap} data-testid="back-pill" aria-label="بازگشت به نقشه‌ی مدرسه">
+            <img src={icon('backHeader')} width={16} height={16} alt="" className="crumb-back" />
+            <img src={icon('mapPill')} width={16} height={16} alt="" />
+            <span className="school">{schoolInfo.name}</span>
+            <span className="slash">/</span>
+            <span className="here" aria-current="page">
+              {library.name}
+            </span>
+          </button>
+        </nav>
       </Item>
 
       <Item className="lib-header">
-        <button className="icon-btn" onClick={backToMap} aria-label="بازگشت" data-testid="lib-back">
-          <img src={icon('backHeader')} width={18} height={18} alt="" />
-        </button>
         <div className="t">
           <b>{library.name}</b>
           <span>{library.subtitle}</span>

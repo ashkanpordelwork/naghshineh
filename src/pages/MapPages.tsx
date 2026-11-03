@@ -80,6 +80,7 @@ export function SchoolPage() {
         nav="office"
         topFade={desktop() ? 240 : 250}
         controlsLift={43}
+        noNav
         startCam={(base) => {
           if (!transition.toSchool) return null;
           transition.toSchool = false;

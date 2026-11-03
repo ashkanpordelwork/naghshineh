@@ -111,7 +111,7 @@ async function run(label, viewport, opts = {}) {
   ok(url() === '/school', 'single tap «مدرسه» (even right after a drag) → zoom + crossfade to school');
   ok(await visible('school-header'), 'school header');
   ok(await visible('legend'), 'stage legend');
-  ok((await tid('nav-office').getAttribute('aria-current')) === 'page', 'nav switched to دفتر کار');
+  ok((await tid('nav-office').count()) === 0 && (await tid('bottom-nav').count()) === 0, 'school map has no section nav');
 
   // ── Step 3: select library ──
   await page.waitForTimeout(1200); // let the tags finish their entrance
@@ -300,6 +300,8 @@ async function run(label, viewport, opts = {}) {
   ok(true, 'school info button → dialog');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
+  await page.goto(base + '#/school/library');
+  await tid('leaderboard').waitFor();
   await tid('nav-roles').click();
   await tid('coming-soon').waitFor();
   ok(url() === '/soon/roles', 'نقش‌ها → coming soon');
