@@ -152,7 +152,20 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
               )}
             </AnimatePresence>
             <div style={{ position: 'absolute', left: 16, right: 16, top: desktop ? (section === 'hood' ? 20 : 16) : section === 'hood' ? 72 : 64, zIndex: 5 }}>
-              <Appear from="down" delay={0.1}>{header(desktop, locate)}</Appear>
+              {/* inside a place the intro card steps aside; it returns when the sheet closes */}
+              <AnimatePresence initial={false}>
+                {!selected && (
+                  <motion.div
+                    key="map-header"
+                    initial={{ opacity: 0, y: reduce ? 0 : -16 }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+                    exit={{ opacity: 0, y: reduce ? 0 : -16, transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }}
+                    data-testid="map-header"
+                  >
+                    <Appear from="down" delay={0.1}>{header(desktop, locate)}</Appear>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <PlaceSheet place={selected} onClose={close} onEnter={onEnter} style={sheetStyle} />
           </>

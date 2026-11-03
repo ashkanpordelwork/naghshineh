@@ -120,6 +120,8 @@ async function run(label, viewport, opts = {}) {
   await tid('place-sheet').waitFor();
   ok((await tid('sheet-title').textContent()) === 'کتابخانه', 'sheet shows کتابخانه');
   ok(url().includes('place=library'), 'selection in URL');
+  await page.waitForTimeout(400);
+  ok((await tid('school-header').count()) === 0, 'school intro card hidden while a place is open');
   ok(await visible('selection-outline'), 'dashed selection outline');
   await page.waitForTimeout(400);
   const op = await page.$eval('[data-testid="tag-lab"]', (e) => getComputedStyle(e.parentElement).opacity);
@@ -133,6 +135,7 @@ async function run(label, viewport, opts = {}) {
   await page.waitForTimeout(500);
   ok(!(await tid('place-sheet').count()), '× closes sheet');
   ok(!url().includes('place='), 'selection cleared');
+  ok(await visible('school-header'), 'school intro card back after closing');
   await tid('sprite-library').click();
   await tid('place-sheet').waitFor();
   await page.waitForTimeout(700); // let the sheet finish sliding in
@@ -260,6 +263,8 @@ async function run(label, viewport, opts = {}) {
   await page.goBack();
   await tid('place-sheet').waitFor();
   ok(true, 'browser back from library → sheet open');
+  await tid('sheet-close').click();
+  await tid('school-back').waitFor();
   await tid('school-back').click();
   await tid('screen-hood').waitFor();
   ok(url() === '/', 'school back button → neighbourhood (zoom out)');
