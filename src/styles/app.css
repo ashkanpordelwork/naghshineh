@@ -605,3 +605,17 @@ img { -webkit-user-drag: none; user-select: none; }
 .role-pending { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: 14px; background: rgba(255, 224, 138, 0.08); }
 .role-pending .clock { width: 32px; height: 32px; }
 .role-pending .txt { flex: 1; font-weight: 800; font-size: 12px; color: var(--gold-light); }
+
+/* role summary inside the request form */
+.join-role {
+  display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 14px;
+  background: color-mix(in srgb, var(--role) 10%, transparent); border: 1px solid color-mix(in srgb, var(--role) 40%, transparent);
+}
+.join-role .t { display: flex; flex-direction: column; gap: 4px; }
+.join-role .k { font-weight: 800; font-size: 11px; color: var(--muted); }
+.join-role .d { font-weight: 700; font-size: 13px; line-height: 22px; color: var(--text); }
+.join-role .meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.join-role .meta span { padding: 4px 10px; border-radius: 99px; font-weight: 800; font-size: 11px; }
+.join-role .meta .slot { background: rgba(154, 245, 195, 0.12); color: var(--mint); border: 1px solid rgba(154, 245, 195, 0.35); }
+.join-role .meta .perk { background: rgba(255, 224, 138, 0.1); color: var(--gold-light); border: 1px solid rgba(255, 224, 138, 0.3); }
+.join-note { font-weight: 700; font-size: 11px; color: var(--muted); }

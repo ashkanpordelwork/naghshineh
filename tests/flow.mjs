@@ -211,14 +211,15 @@ async function run(label, viewport, opts = {}) {
   // ── Step 6: membership request ──
   await tid('join-guide').click();
   await tid('join-dialog').waitFor();
-  ok((await tid('role-راهنمای کتاب').getAttribute('aria-checked')) === 'true', 'tapped role is preselected in the request form');
+  ok((await tid('join-dialog').textContent()).includes('درخواست نقش راهنمای کتاب'), 'form is titled with the tapped role');
+  ok((await tid('role-تبلیغات').count()) === 0, 'form shows only that role (no role picker)');
   ok(await tid('join-submit').isDisabled(), 'submit disabled until the reason is written');
   await tid('join-reason').fill('کتاب');
   ok(await tid('join-submit').isDisabled(), 'still disabled with short text');
   await tid('join-reason').fill('عاشق کتاب‌خوندنم و می‌خوام کمک کنم');
   ok(!(await tid('join-submit').isDisabled()), 'enabled with role + ≥10 chars');
   await tid('join-submit').click();
-  ok(await toast('درخواستت برای امیر حسینی فرستاده شد'), 'toast after request');
+  ok(await toast('درخواست نقش راهنمای کتاب برای امیر حسینی فرستاده شد'), 'toast after request');
   await tid('join-pending').waitFor();
   ok((await tid('join-pending').textContent()).includes('در انتظار تایید امیر حسینی'), 'role card → pending');
   ok(await tid('join-promo').isDisabled(), 'other role locked while a request is pending');

@@ -7,47 +7,55 @@ import { icon } from '../ui/icons';
 
 const MIN = 10;
 
+/** Request form for one specific role (the one tapped in «نقش‌های آزاد»). */
 export function JoinDialog({ open, onClose, initialRole }: { open: boolean; onClose: () => void; initialRole?: string | null }) {
   const send = useApp((s) => s.sendJoin);
   const toast = useUi((s) => s.toast);
-  const [role, setRole] = useState<string | null>(null);
   const [text, setText] = useState('');
+  // keep the last role while the sheet animates out
+  const [roleName, setRoleName] = useState<string | null>(initialRole ?? null);
   useEffect(() => {
     if (open) {
-      setRole(initialRole ?? null);
       setText('');
+      setRoleName(initialRole ?? null);
     }
   }, [open, initialRole]);
+  const role = library.openRoles.find((r) => r.name === roleName);
   const len = text.trim().length;
   const ok = !!role && len >= MIN;
   return (
-    <Overlay open={open} onClose={onClose} title="درخواست عضویت در کتابخانه" testId="join-dialog">
-      <span className="field-label">کدوم نقش رو می‌خوای؟</span>
-      <div className="role-opts" role="radiogroup">
-        {library.openRoles.map((r) => (
-          <button key={r.id} role="radio" aria-checked={role === r.name} className={`role-opt${role === r.name ? ' on' : ''}`} onClick={() => setRole(r.name)} data-testid={`role-${r.name}`}>
-            {r.name}
-          </button>
-        ))}
-      </div>
+    <Overlay open={open} onClose={onClose} title={role ? `درخواست نقش ${role.name}` : 'درخواست نقش'} testId="join-dialog">
+      {role && (
+        <div className="join-role" style={{ ['--role' as string]: role.color } as React.CSSProperties} data-testid="join-role">
+          <div className="t">
+            <span className="k">در کتابخانه‌ی {schoolShort}</span>
+            <span className="d">{role.desc}</span>
+          </div>
+          <div className="meta">
+            <span className="slot">{fa(role.slots)} جای خالی</span>
+            <span className="perk">{role.perks}</span>
+          </div>
+        </div>
+      )}
       <label className="field-label" htmlFor="why">
-        چرا می‌خوای عضو بشی؟
+        چرا می‌خوای {role ? role.name : 'این نقش'} باشی؟
       </label>
-      <textarea id="why" className="textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder="مثلاً: کتاب‌خوندن رو دوست دارم و می‌خوام به بقیه کتاب معرفی کنم" data-testid="join-reason" maxLength={240} />
+      <textarea id="why" className="textarea" value={text} onChange={(e) => setText(e.target.value)} placeholder={role?.id === 'promo' ? 'مثلاً: نقاشی و طراحی پوستر رو دوست دارم' : 'مثلاً: کتاب‌خوندن رو دوست دارم و می‌خوام به بقیه کتاب معرفی کنم'} data-testid="join-reason" maxLength={240} />
       <div className="counter">
         <span className={len >= MIN ? 'ok' : ''}>{len >= MIN ? 'آماده‌ی ارسال' : `حداقل ${fa(MIN)} کاراکتر`}</span>
         <span>
           {fa(len)} / {fa(240)}
         </span>
       </div>
+      <p className="join-note">درخواستت برای امیر حسینی، مسئول کتابخانه، فرستاده می‌شه.</p>
       <button
         className="btn btn-primary btn-lg glow"
         disabled={!ok}
         data-testid="join-submit"
         onClick={() => {
-          send(role!, text.trim());
+          send(role!.name, text.trim());
           onClose();
-          toast('درخواستت برای امیر حسینی فرستاده شد');
+          toast(`درخواست نقش ${role!.name} برای امیر حسینی فرستاده شد`);
         }}
       >
         ارسال درخواست
@@ -55,6 +63,8 @@ export function JoinDialog({ open, onClose, initialRole }: { open: boolean; onCl
     </Overlay>
   );
 }
+
+const schoolShort = 'مدرسه';
 
 export function CancelDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const cancel = useApp((s) => s.cancelJoin);
