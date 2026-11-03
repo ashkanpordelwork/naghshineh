@@ -172,7 +172,8 @@ async function run(label, viewport, opts = {}) {
   ok(await visible('manager-card'), 'manager card');
   ok((await tid('tab-members').getAttribute('aria-selected')) === 'true', 'tab «اعضای امسال» active');
   ok((await tid('podium-1').textContent()).includes('سینا کریمی'), 'podium #1 سینا کریمی ۸۲۰');
-  ok(await visible('join-card'), 'join card');
+  ok((await tid('open-roles').count()) === 1 && (await tid('open-role-guide').count()) === 1 && (await tid('open-role-promo').count()) === 1, 'open roles section lists both free roles');
+  ok((await tid('bottom-nav').count()) === 0 && (await tid('nav-office').count()) === 0, 'library page has no section nav');
   await tid('message-btn').click();
   await tid('message-text').fill('سلام امیر، کتاب جدید رسیده؟');
   await tid('message-send').click();
@@ -208,10 +209,10 @@ async function run(label, viewport, opts = {}) {
   ok(Math.abs(y - 400) < 60, `members tab restores its own scroll (${y})`);
 
   // ── Step 6: membership request ──
-  await tid('join-btn').click();
+  await tid('join-guide').click();
   await tid('join-dialog').waitFor();
-  ok(await tid('join-submit').isDisabled(), 'submit disabled until role + text');
-  await tid('role-راهنمای کتاب').click();
+  ok((await tid('role-راهنمای کتاب').getAttribute('aria-checked')) === 'true', 'tapped role is preselected in the request form');
+  ok(await tid('join-submit').isDisabled(), 'submit disabled until the reason is written');
   await tid('join-reason').fill('کتاب');
   ok(await tid('join-submit').isDisabled(), 'still disabled with short text');
   await tid('join-reason').fill('عاشق کتاب‌خوندنم و می‌خوام کمک کنم');
@@ -219,14 +220,15 @@ async function run(label, viewport, opts = {}) {
   await tid('join-submit').click();
   ok(await toast('درخواستت برای امیر حسینی فرستاده شد'), 'toast after request');
   await tid('join-pending').waitFor();
-  ok((await tid('join-pending').textContent()).includes('در انتظار تایید امیر حسینی'), 'card → pending');
+  ok((await tid('join-pending').textContent()).includes('در انتظار تایید امیر حسینی'), 'role card → pending');
+  ok(await tid('join-promo').isDisabled(), 'other role locked while a request is pending');
   await page.reload();
   await tid('join-pending').waitFor({ timeout: 4000 });
   ok(true, 'pending survives refresh (localStorage)');
   await tid('cancel-btn').click();
   await tid('cancel-confirm').click();
-  await tid('join-card').waitFor();
-  ok(true, 'cancel request → card back to initial');
+  await tid('join-guide').waitFor();
+  ok(!(await tid('join-promo').isDisabled()), 'cancel request → roles back to initial');
 
   // ── resize mid-flow keeps state ──
   await tid('tab-history').click();
@@ -305,8 +307,7 @@ async function run(label, viewport, opts = {}) {
   ok(true, 'school info button → dialog');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
-  await page.goto(base + '#/school/library');
-  await tid('leaderboard').waitFor();
+  await page.goto(base + '#/soon/tasks');
   await tid('nav-roles').click();
   await tid('coming-soon').waitFor();
   ok(url() === '/soon/roles', 'نقش‌ها → coming soon');

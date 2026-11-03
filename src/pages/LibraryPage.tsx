@@ -5,7 +5,7 @@ import { asset, fa, library, people, schoolInfo, user, type Member } from '../da
 import { useApp } from '../store';
 import { useIsDesktop } from '../hooks/useMedia';
 import { Page } from '../components/layout/Page';
-import { BottomNav, TopBar, TopNav } from '../components/layout/Nav';
+import { TopBar, TopNav } from '../components/layout/Nav';
 import { Avatar } from '../components/ui/Avatar';
 import { Item, Stagger } from '../components/ui/Reveal';
 import { icon } from '../components/ui/icons';
@@ -28,7 +28,7 @@ export function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [msg, setMsg] = useState(false);
-  const [join, setJoin] = useState(false);
+  const [join, setJoin] = useState<string | null>(null);
   const [cancel, setCancel] = useState(false);
   const [pick, setPick] = useState<{ m: Member; r: number; year: string } | null>(null);
   const state = (location.state ?? {}) as NavState;
@@ -124,7 +124,7 @@ export function LibraryPage() {
                 <Stagger key={tab} gap={0.07} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} exit={{ opacity: 0, transition: { duration: 0.15 } }}>
                   <ScrollRestore tab={tab} />
                   {tab === 'members' ? (
-                    <MembersTab onPick={(m, r) => setPick({ m, r, year: library.currentYear })} onJoin={() => setJoin(true)} onCancel={() => setCancel(true)} />
+                    <MembersTab onPick={(m, r) => setPick({ m, r, year: library.currentYear })} onJoin={(role) => setJoin(role)} onCancel={() => setCancel(true)} />
                   ) : (
                     <HistoryTab onPick={(m, r, year) => setPick({ m, r, year })} />
                   )}
@@ -147,7 +147,7 @@ export function LibraryPage() {
     >
       {desktop ? (
         <>
-          <TopNav section="school" active="office" />
+          <TopNav section="school" active="office" noTabs />
           <div className="desk-page">
             <div className="desk-col">{body}</div>
           </div>
@@ -158,11 +158,10 @@ export function LibraryPage() {
             <TopBar />
           </div>
           {body}
-          <BottomNav section="school" active="office" />
         </>
       )}
       <MessageDialog open={msg} onClose={() => setMsg(false)} />
-      <JoinDialog open={join} onClose={() => setJoin(false)} />
+      <JoinDialog open={!!join} initialRole={join} onClose={() => setJoin(null)} />
       <CancelDialog open={cancel} onClose={() => setCancel(false)} />
       <ProfileDialog member={pick?.m ?? null} rank={pick?.r ?? 0} yearLabel={pick?.year ?? ''} onClose={() => setPick(null)} />
     </Page>
@@ -256,8 +255,7 @@ function SectionTitle({ title, meta, bar }: { title: string; meta?: string; bar:
   );
 }
 
-function MembersTab({ onPick, onJoin, onCancel }: { onPick: (m: Member, r: number) => void; onJoin: () => void; onCancel: () => void }) {
-  const join = useApp((s) => s.join);
+function MembersTab({ onPick, onJoin, onCancel }: { onPick: (m: Member, r: number) => void; onJoin: (role: string) => void; onCancel: () => void }) {
   return (
     <>
       <Item>
@@ -267,48 +265,10 @@ function MembersTab({ onPick, onJoin, onCancel }: { onPick: (m: Member, r: numbe
         <Leaderboard members={library.members} onPick={onPick} animKey="current" />
       </Item>
       <Item>
-      <AnimatePresence mode="wait" initial={false}>
-        {join.status === 'none' ? (
-          <motion.div key="join" className="card join-card" data-testid="join-card" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
-            <div className="top">
-              <Avatar person="ali" size={40} ring="#3ddcff" ringWidth={2} />
-              <div className="t">
-                <b>تو هنوز عضو کتابخانه نیستی</b>
-                <span>{fa(library.openRoles.length)} نقش خالی داره؛ با عضویت اسمت وارد جدول می‌شه</span>
-              </div>
-            </div>
-            <div className="actions">
-              <button className="btn btn-primary" onClick={onJoin} data-testid="join-btn">
-                درخواست عضویت
-              </button>
-              <span className="roles">{library.openRoles.join('، ')}</span>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div key="pending" className="card join-card pending" data-testid="join-pending" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
-            <div className="top">
-              <span className="clock" aria-hidden>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <circle cx="10" cy="10" r="7.5" stroke="#ffe08a" strokeWidth="1.8" />
-                  <path d="M10 6v4.3l2.8 1.7" stroke="#ffe08a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <div className="t">
-                <b>درخواست در انتظار تایید امیر حسینی</b>
-                <span>نقش درخواستی: {join.role}</span>
-              </div>
-            </div>
-            <div className="actions">
-              <button className="btn btn-secondary" onClick={onCancel} data-testid="cancel-btn">
-                لغو درخواست
-              </button>
-              <span className="roles" style={{ color: 'var(--gold-light)' }}>
-                {user.name}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <SectionTitle title="نقش‌های آزاد" meta={`${fa(library.openRoles.length)} نقش خالی`} bar="#9af5c3" />
+      </Item>
+      <Item>
+        <OpenRoles onJoin={onJoin} onCancel={onCancel} />
       </Item>
       <Item>
         <SectionTitle title="فعالیت‌های اخیر" bar="#4da3ff" />
@@ -406,5 +366,65 @@ function Skeleton() {
       <div className="skeleton" style={{ height: 48, borderRadius: 14 }} />
       <div className="skeleton" style={{ height: 390 }} />
     </div>
+  );
+}
+
+/** Open roles: each card shows the role and lets Ali request it directly. */
+function OpenRoles({ onJoin, onCancel }: { onJoin: (role: string) => void; onCancel: () => void }) {
+  const join = useApp((s) => s.join);
+  const pendingRole = join.status === 'pending' ? join.role : null;
+  return (
+    <Stagger className="open-roles" data-testid="open-roles" gap={0.08} delay={0.05}>
+      {library.openRoles.map((r) => {
+        const pending = pendingRole === r.name;
+        const locked = !!pendingRole && !pending;
+        return (
+          <Item key={r.id} className={`card role-card${pending ? ' pending' : ''}${locked ? ' locked' : ''}`} data-testid={`open-role-${r.id}`} style={{ ['--role' as string]: r.color } as React.CSSProperties}>
+            <div className="top">
+              <span className="role-ico" aria-hidden>
+                {r.id === 'guide' ? (
+                  <img src={icon('menuBook')} width={22} height={22} alt="" />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z" fill="#fff" />
+                    <path d="M16 8.5a4 4 0 0 1 0 7M18.5 6a7.5 7.5 0 0 1 0 12" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                )}
+              </span>
+              <div className="t">
+                <b>{r.name}</b>
+                <span>{r.desc}</span>
+              </div>
+            </div>
+            <div className="meta">
+              <span className="slot">{fa(r.slots)} جای خالی</span>
+              <span className="perk">{r.perks}</span>
+            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              {pending ? (
+                <motion.div key="p" className="role-pending" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} data-testid="join-pending">
+                  <span className="clock" aria-hidden>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="10" r="7.5" stroke="#ffe08a" strokeWidth="1.8" />
+                      <path d="M10 6v4.3l2.8 1.7" stroke="#ffe08a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="txt">درخواست در انتظار تایید امیر حسینی</span>
+                  <button className="btn btn-secondary" onClick={onCancel} data-testid="cancel-btn">
+                    لغو درخواست
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div key="a" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+                  <button className="btn btn-primary role-btn" disabled={locked} onClick={() => onJoin(r.name)} data-testid={`join-${r.id}`}>
+                    {locked ? 'یک درخواست فعال داری' : `درخواست نقش ${r.name}`}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Item>
+        );
+      })}
+    </Stagger>
   );
 }

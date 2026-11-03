@@ -7,17 +7,17 @@ import { icon } from '../ui/icons';
 
 const MIN = 10;
 
-export function JoinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function JoinDialog({ open, onClose, initialRole }: { open: boolean; onClose: () => void; initialRole?: string | null }) {
   const send = useApp((s) => s.sendJoin);
   const toast = useUi((s) => s.toast);
   const [role, setRole] = useState<string | null>(null);
   const [text, setText] = useState('');
   useEffect(() => {
     if (open) {
-      setRole(null);
+      setRole(initialRole ?? null);
       setText('');
     }
-  }, [open]);
+  }, [open, initialRole]);
   const len = text.trim().length;
   const ok = !!role && len >= MIN;
   return (
@@ -25,8 +25,8 @@ export function JoinDialog({ open, onClose }: { open: boolean; onClose: () => vo
       <span className="field-label">کدوم نقش رو می‌خوای؟</span>
       <div className="role-opts" role="radiogroup">
         {library.openRoles.map((r) => (
-          <button key={r} role="radio" aria-checked={role === r} className={`role-opt${role === r ? ' on' : ''}`} onClick={() => setRole(r)} data-testid={`role-${r}`}>
-            {r}
+          <button key={r.id} role="radio" aria-checked={role === r.name} className={`role-opt${role === r.name ? ' on' : ''}`} onClick={() => setRole(r.name)} data-testid={`role-${r.name}`}>
+            {r.name}
           </button>
         ))}
       </div>
