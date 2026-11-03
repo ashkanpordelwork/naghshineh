@@ -97,14 +97,24 @@ async function run(label, viewport, opts = {}) {
   ok(true, 'locate returns to centre');
 
   // ── Step 2: enter school ──
+  // regression: a drag that ends off the map (no click follows) must not eat the next tap
+  await page.mouse.move(vp.x + vp.width / 2, vp.y + vp.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(vp.x + vp.width / 2 + 30, vp.y + 40, { steps: 6 });
+  await page.mouse.move(vp.x + vp.width / 2 + 30, 10, { steps: 4 });
+  await page.mouse.up();
+  await page.waitForTimeout(700);
+  await tid('locate').click();
+  await page.waitForTimeout(900);
   await tid('tag-school').click();
-  await tid('screen-school').waitFor({ timeout: 4000 });
-  ok(url() === '/school', 'tap «مدرسه» → zoom + crossfade to school map');
+  await tid('screen-school').waitFor({ timeout: 2500 });
+  ok(url() === '/school', 'single tap «مدرسه» (even right after a drag) → zoom + crossfade to school');
   ok(await visible('school-header'), 'school header');
   ok(await visible('legend'), 'stage legend');
   ok((await tid('nav-office').getAttribute('aria-current')) === 'page', 'nav switched to دفتر کار');
 
   // ── Step 3: select library ──
+  await page.waitForTimeout(1200); // let the tags finish their entrance
   await reveal('tag-library');
   await tid('tag-library').click();
   await tid('place-sheet').waitFor();
@@ -244,9 +254,9 @@ async function run(label, viewport, opts = {}) {
   await page.goForward();
   await tid('place-sheet').waitFor();
   ok(true, 'browser forward reopens it');
-  await tid('sheet-details').click();
+  ok((await tid('sheet-details').count()) === 0, '«جزئیات» button removed');
+  await tid('sheet-enter').click();
   await tid('screen-library').waitFor();
-  ok(true, '«جزئیات» opens the library');
   await page.goBack();
   await tid('place-sheet').waitFor();
   ok(true, 'browser back from library → sheet open');
@@ -279,7 +289,8 @@ async function run(label, viewport, opts = {}) {
   await tid('tag-mosque').click();
   await tid('place-sheet').waitFor();
   ok((await tid('sheet-title').textContent()) === 'مسجد محله', 'other neighbourhood place → its sheet');
-  await tid('sheet-details').click();
+  await page.waitForTimeout(500);
+  await tid('sheet-enter').click();
   ok(await toast('هنوز در نسخه‌ی آزمایشی نیست'), '… and entering it shows a toast');
   await tid('sheet-close').click();
   await page.waitForTimeout(400);
@@ -315,5 +326,28 @@ async function run(label, viewport, opts = {}) {
 await run('mobile', { width: 360, height: 800 });
 await run('desktop', { width: 1440, height: 900 });
 await run('mobile + prefers-reduced-motion', { width: 360, height: 800 }, { reducedMotion: 'reduce' });
+// real touch taps on an emulated iPhone: one tap must be enough
+{
+  console.log('\n▶ iPhone touch taps');
+  const devices = (() => { try { return require('playwright').devices; } catch { return require('/opt/node22/lib/node_modules/playwright').devices; } })();
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  const page = await ctx.newPage();
+  const tid = (id) => page.locator(`[data-testid="${id}"]:not([aria-hidden="true"] *)`);
+  await page.goto(base);
+  await tid('screen-hood').waitFor();
+  await page.waitForTimeout(1500);
+  await tid('tag-school').tap();
+  await tid('screen-school').waitFor({ timeout: 2500 }).then(() => ok(true, 'one tap on «مدرسه» enters the school'), () => ok(false, 'one tap on «مدرسه» enters the school'));
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => (location.hash = '#/school?place=library'));
+  await page.waitForTimeout(900);
+  await tid('sheet-close').tap();
+  await page.waitForTimeout(600);
+  await tid('sprite-library').tap();
+  await page.waitForFunction(() => document.querySelector('[data-testid=sheet-title]')?.textContent === 'کتابخانه', null, { timeout: 2500 })
+    .then(() => ok(true, 'one tap on «کتابخانه» opens its sheet'), () => ok(false, 'one tap on «کتابخانه» opens its sheet'));
+  await browser.close();
+}
 console.log(failures ? `\n${failures} check(s) failed` : '\nall checks passed');
 process.exit(failures ? 1 : 0);

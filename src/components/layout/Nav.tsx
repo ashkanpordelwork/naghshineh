@@ -70,7 +70,9 @@ export function UserBlock() {
   return (
     <button className="user-block" onClick={() => nav('/soon/profile')} aria-label={`پروفایل ${user.name}`} data-testid="user-block">
       <span className="user-avatar">
-        <span className="photo">{user.initials}</span>
+        <span className="photo">
+          <img src={asset(user.photo)} alt="" />
+        </span>
         <span className="level">{user.level.toLocaleString('fa-IR')}</span>
       </span>
       <span className="names">

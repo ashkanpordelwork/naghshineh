@@ -9,6 +9,7 @@ import { MapFades, Minimap, ZoomControls } from '../components/map/MapChrome';
 import { PlaceSheet } from '../components/map/PlaceSheet';
 import { BottomNav, TopBar, TopNav, type Section } from '../components/layout/Nav';
 import { Page } from '../components/layout/Page';
+import { Appear } from '../components/ui/Reveal';
 
 export interface NavState {
   from?: 'hood' | 'sheet';
@@ -26,7 +27,6 @@ interface Props {
   /** a place was tapped that should be "entered" straight away (neighbourhood → school) */
   onDirectEnter?: (p: Place, map: MapHandle) => void;
   onEnter: (p: Place) => void;
-  onDetails: (p: Place) => void;
   /** start camera override (zoom hand-off from the other map) */
   startCam?: (base: Cam) => { from: Cam; to?: Cam } | null;
   topFade: number;
@@ -38,7 +38,7 @@ export function selectedCam(world: World, p: Place, desktop: boolean): Cam {
   return { x: p.lot.x + p.lot.w / 2, y: p.lot.y + p.lot.h / 2 + (desktop ? world.selectOffset.desktop : world.selectOffset.mobile), s: base.s };
 }
 
-export function MapScreen({ world, section, nav, header, footer, onDirectEnter, onEnter, onDetails, startCam, topFade, controlsLift = 0 }: Props) {
+export function MapScreen({ world, section, nav, header, footer, onDirectEnter, onEnter, startCam, topFade, controlsLift = 0 }: Props) {
   const desktop = useIsDesktop();
   const reduce = useReducedMotion();
   const navigate = useNavigate();
@@ -130,20 +130,28 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
             <AnimatePresence>
               {!selected && (
                 <motion.div key="ctrls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <ZoomControls api={api} onLocate={locate} style={{ left: 16, bottom: `calc(${ctrlBottom}px + ${desktop ? '0px' : 'var(--safe-b)'})` }} />
+                  <Appear from="left" delay={0.3} style={{ position: 'absolute', left: 16, bottom: `calc(${ctrlBottom}px + ${desktop ? '0px' : 'var(--safe-b)'})` }}>
+                    <ZoomControls api={api} onLocate={locate} style={{ position: 'static' }} />
+                  </Appear>
                   <div style={{ position: 'absolute', right: 16, bottom: `calc(${ctrlBottom}px + ${desktop ? '0px' : 'var(--safe-b)'})` }}>
-                    <Minimap world={world} api={api} onLocateCenter={locate} />
+                    <Appear from="right" delay={0.35}>
+                      <Minimap world={world} api={api} onLocateCenter={locate} />
+                    </Appear>
                   </div>
                   {footer && (
                     <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', bottom: desktop ? 76 : 'calc(98px + var(--safe-b))', pointerEvents: 'none' }}>
-                      <div style={{ pointerEvents: 'auto' }}>{footer}</div>
+                      <Appear from="up" delay={0.45} style={{ pointerEvents: 'auto' }}>
+                        {footer}
+                      </Appear>
                     </div>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
-            <div style={{ position: 'absolute', left: 16, right: 16, top: desktop ? (section === 'hood' ? 20 : 16) : section === 'hood' ? 72 : 64, zIndex: 5 }}>{header(desktop, locate)}</div>
-            <PlaceSheet place={selected} onClose={close} onEnter={onEnter} onDetails={onDetails} style={sheetStyle} />
+            <div style={{ position: 'absolute', left: 16, right: 16, top: desktop ? (section === 'hood' ? 20 : 16) : section === 'hood' ? 72 : 64, zIndex: 5 }}>
+              <Appear from="down" delay={0.1}>{header(desktop, locate)}</Appear>
+            </div>
+            <PlaceSheet place={selected} onClose={close} onEnter={onEnter} style={sheetStyle} />
           </>
         )}
       >
@@ -156,10 +164,9 @@ export function MapScreen({ world, section, nav, header, footer, onDirectEnter, 
   return (
     <Page
       className="map-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduce ? 0.12 : 0.3, ease: 'easeOut' }}
+      initial={{ opacity: 0, scale: reduce ? 1 : 1.02 }}
+      animate={{ opacity: 1, scale: 1, transition: { duration: reduce ? 0.15 : 0.45, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, transition: { duration: reduce ? 0.12 : 0.28, ease: [0.4, 0, 1, 1] } }}
       data-testid={`screen-${world.id}`}
     >
       {desktop ? (

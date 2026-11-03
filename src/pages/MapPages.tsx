@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { hood, school, schoolInfo, STAGES, type Place } from '../data';
 import { transition, useUi } from '../store';
 import { icon } from '../components/ui/icons';
@@ -12,6 +12,7 @@ const lotCenter = (p: Place) => ({ x: p.lot.x + p.lot.w / 2, y: p.lot.y + p.lot.
 /** Step 1 – neighbourhood map. */
 export function NeighborhoodPage() {
   const navigate = useNavigate();
+  const entering = useRef(false);
   const toast = useUi((s) => s.toast);
   const schoolPlace = hood.places.find((p) => p.id === 'school')!;
 
@@ -39,13 +40,16 @@ export function NeighborhoodPage() {
       )}
       onDirectEnter={(p, map) => {
         // tag pops (handled by "pressed"), camera springs onto the school, then crossfade to the school map
-        map.flyTo({ ...lotCenter(p), s: 1.9 }, { spring: false, duration: 0.42 }).then(() => {
+        if (entering.current) return;
+        entering.current = true;
+        map.flyTo({ ...lotCenter(p), s: 1.9 }, { spring: false, duration: 0.42 });
+        // navigate on a timer, not on the animation promise (an interrupted animation never resolves)
+        window.setTimeout(() => {
           transition.toSchool = true;
           navigate('/school', { state: { from: 'hood', depth: 0 } satisfies NavState });
-        });
+        }, 430);
       }}
       onEnter={() => toast(notInPrototype, 'info')}
-      onDetails={() => toast(notInPrototype, 'info')}
     />
   );
 }
@@ -124,7 +128,6 @@ export function SchoolPage() {
           </div>
         }
         onEnter={openLibrary}
-        onDetails={openLibrary}
       />
       <Overlay open={info} onClose={() => setInfo(false)} title={schoolInfo.name} testId="school-info-sheet">
         <p style={{ fontWeight: 700, fontSize: 13, lineHeight: '24px', color: 'var(--muted-3)' }}>

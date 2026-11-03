@@ -7,7 +7,6 @@ interface Props {
   place: Place | null;
   onClose: () => void;
   onEnter: (p: Place) => void;
-  onDetails: (p: Place) => void;
   style: React.CSSProperties;
 }
 
@@ -15,7 +14,7 @@ const stageOrder = [...STAGES].reverse(); // RTL: «آماده‌ی ساخت» o
 const filledCount = (p: Place) => (p.stage ? 4 - STAGES.findIndex((s) => s.id === p.stage) : 0);
 
 /** Bottom sheet for a selected map place (inside the 560 column on desktop). */
-export function PlaceSheet({ place, onClose, onEnter, onDetails, style }: Props) {
+export function PlaceSheet({ place, onClose, onEnter, style }: Props) {
   const reduce = useReducedMotion();
   const controls = useDragControls();
   const onDragEnd = (_: unknown, i: PanInfo) => {
@@ -54,7 +53,7 @@ export function PlaceSheet({ place, onClose, onEnter, onDetails, style }: Props)
               exit={{ opacity: 0, x: reduce ? 0 : 10 }}
               transition={{ duration: 0.16 }}
             >
-              <SheetBody place={place} onClose={onClose} onEnter={onEnter} onDetails={onDetails} />
+              <SheetBody place={place} onClose={onClose} onEnter={onEnter} />
             </motion.div>
           </AnimatePresence>
         </motion.section>
@@ -63,11 +62,11 @@ export function PlaceSheet({ place, onClose, onEnter, onDetails, style }: Props)
   );
 }
 
-function SheetBody({ place, onClose, onEnter, onDetails }: Omit<Props, 'style' | 'place'> & { place: Place }) {
+function SheetBody({ place, onClose, onEnter }: Omit<Props, 'style' | 'place'> & { place: Place }) {
   const st = place.stage ? stageInfo(place.stage) : null;
   const filled = filledCount(place);
   const isLib = place.id === 'library';
-  const headPerson = isLib ? people.amir : place.head ? { id: place.id, name: place.head, initials: place.head.split(' ').map((w) => w[0]).join(' ').slice(0, 3), tint: place.dot } : null;
+  const headPerson = isLib ? people.amir : place.head ? Object.values(people).find((x) => x.name === place.head) ?? { id: place.id, name: place.head, initials: place.head.split(' ').map((w) => w[0]).join(' ').slice(0, 3), tint: place.dot } : null;
   const stack = isLib ? ['sina', 'mohammad', 'reza'] : ['parsa', 'kian', 'arash'];
   return (
     <>
@@ -150,9 +149,6 @@ function SheetBody({ place, onClose, onEnter, onDetails }: Omit<Props, 'style' |
         <motion.button className="btn btn-primary btn-lg glow" onClick={() => onEnter(place)} data-testid="sheet-enter">
           ورود به {place.name}
         </motion.button>
-        <button className="btn btn-secondary btn-lg" style={{ padding: '12px 20px' }} onClick={() => onDetails(place)} data-testid="sheet-details">
-          جزئیات
-        </button>
       </div>
     </>
   );

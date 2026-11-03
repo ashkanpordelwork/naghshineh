@@ -21,7 +21,7 @@ export const user = {
   points: 6400,
   streak: 12,
   notifications: 2,
-  photo: 'assets/avatars/ali.png',
+  photo: 'assets/avatars/student-01.webp',
 };
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -214,21 +214,21 @@ export interface Person {
 }
 
 export const people: Record<string, Person> = {
-  amir: { id: 'amir', name: 'امیر حسینی', initials: 'ا ح', photo: 'assets/avatars/amir.png', grade: 'پایه‌ی نهم' },
-  sina: { id: 'sina', name: 'سینا کریمی', initials: 'س ک', photo: 'assets/avatars/sina.png', grade: 'پایه‌ی نهم' },
-  mohammad: { id: 'mohammad', name: 'محمد نوری', initials: 'م ن', photo: 'assets/avatars/mohammad.png', grade: 'پایه‌ی هشتم' },
-  reza: { id: 'reza', name: 'رضا احمدی', initials: 'ر ا', photo: 'assets/avatars/reza.png', grade: 'پایه‌ی هشتم' },
-  mahdi: { id: 'mahdi', name: 'مهدی صالحی', initials: 'م ص', tint: '#6b7a8b', grade: 'پایه‌ی هفتم' },
-  ali: { id: 'ali', name: 'علی رضایی', initials: 'ع ر', photo: 'assets/avatars/ali.png', grade: 'پایه‌ی هشتم' },
-  hossein: { id: 'hossein', name: 'حسین مرادی', initials: 'ح م', tint: '#b07cff', grade: 'فارغ‌التحصیل' },
-  parsa: { id: 'parsa', name: 'پارسا نیکو', initials: 'پ ن', tint: '#4da3ff', grade: 'پایه‌ی نهم' },
-  kian: { id: 'kian', name: 'کیان رحیمی', initials: 'ک ر', tint: '#5e8a6a', grade: 'فارغ‌التحصیل' },
-  arash: { id: 'arash', name: 'آرش بهرامی', initials: 'آ ب', tint: '#8a6a4a', grade: 'پایه‌ی نهم' },
-  nima: { id: 'nima', name: 'نیما فرهادی', initials: 'ن ف', tint: '#c98a5a', grade: 'فارغ‌التحصیل' },
-  matin: { id: 'matin', name: 'متین شریفی', initials: 'م ش', tint: '#4fb86a', grade: 'فارغ‌التحصیل' },
-  hamed: { id: 'hamed', name: 'حامد یزدانی', initials: 'ح ی', tint: '#e06a9a', grade: 'فارغ‌التحصیل' },
-  saeed: { id: 'saeed', name: 'سعید عبداللهی‌نژاد', initials: 'س ع', tint: '#2ba9b8', grade: 'فارغ‌التحصیل' },
-  yasin: { id: 'yasin', name: 'یاسین کاظمی', initials: 'ی ک', tint: '#8c78d0', grade: 'فارغ‌التحصیل' },
+  amir: { id: 'amir', name: 'امیر حسینی', initials: 'ا ح', photo: 'assets/avatars/student-02.webp', grade: 'پایه‌ی نهم' },
+  sina: { id: 'sina', name: 'سینا کریمی', initials: 'س ک', photo: 'assets/avatars/student-03.webp', grade: 'پایه‌ی نهم' },
+  mohammad: { id: 'mohammad', name: 'محمد نوری', initials: 'م ن', photo: 'assets/avatars/student-04.webp', grade: 'پایه‌ی هشتم' },
+  reza: { id: 'reza', name: 'رضا احمدی', initials: 'ر ا', photo: 'assets/avatars/student-05.webp', grade: 'پایه‌ی هشتم' },
+  mahdi: { id: 'mahdi', name: 'مهدی صالحی', initials: 'م ص', photo: 'assets/avatars/student-06.webp', grade: 'پایه‌ی هفتم' },
+  ali: { id: 'ali', name: 'علی رضایی', initials: 'ع ر', photo: 'assets/avatars/student-01.webp', grade: 'پایه‌ی هشتم' },
+  hossein: { id: 'hossein', name: 'حسین مرادی', initials: 'ح م', photo: 'assets/avatars/student-07.webp', grade: 'فارغ‌التحصیل' },
+  parsa: { id: 'parsa', name: 'پارسا نیکو', initials: 'پ ن', photo: 'assets/avatars/student-08.webp', grade: 'پایه‌ی نهم' },
+  kian: { id: 'kian', name: 'کیان رحیمی', initials: 'ک ر', photo: 'assets/avatars/student-09.webp', grade: 'فارغ‌التحصیل' },
+  arash: { id: 'arash', name: 'آرش بهرامی', initials: 'آ ب', photo: 'assets/avatars/student-06.webp', grade: 'پایه‌ی نهم' },
+  nima: { id: 'nima', name: 'نیما فرهادی', initials: 'ن ف', photo: 'assets/avatars/student-02.webp', grade: 'فارغ‌التحصیل' },
+  matin: { id: 'matin', name: 'متین شریفی', initials: 'م ش', photo: 'assets/avatars/student-03.webp', grade: 'فارغ‌التحصیل' },
+  hamed: { id: 'hamed', name: 'حامد یزدانی', initials: 'ح ی', photo: 'assets/avatars/student-04.webp', grade: 'فارغ‌التحصیل' },
+  saeed: { id: 'saeed', name: 'سعید عبداللهی‌نژاد', initials: 'س ع', photo: 'assets/avatars/student-05.webp', grade: 'فارغ‌التحصیل' },
+  yasin: { id: 'yasin', name: 'یاسین کاظمی', initials: 'ی ک', photo: 'assets/avatars/student-05.webp', grade: 'فارغ‌التحصیل' },
 };
 
 export interface Member {

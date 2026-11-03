@@ -139,7 +139,7 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView({ world, in
       onDrag: ({ delta: [dx, dy], movement: [mx, my], pinching, cancel, first }) => {
         if (pinching) return cancel();
         if (first) return;
-        if (Math.hypot(mx, my) > 6 && !moved.current) {
+        if (Math.hypot(mx, my) > 10 && !moved.current) {
           moved.current = true;
           setDragging(true);
         }
@@ -174,12 +174,17 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView({ world, in
     {
       target: vpRef,
       eventOptions: { passive: false },
-      drag: { filterTaps: true, pointer: { touch: true } },
+      drag: { filterTaps: true, threshold: 6 },
       pinch: { scaleBounds: { min: MIN_ZOOM, max: MAX_ZOOM }, from: () => [s.get(), 0], rubberband: false },
       wheel: { eventOptions: { passive: false } },
     },
   );
 
+  // every new touch/press starts clean – a drag that ended without a click
+  // (common on touch screens) must not swallow the next tap
+  const onPointerDownCapture = () => {
+    moved.current = false;
+  };
   // block the click that follows a drag; detect taps on empty map
   const onClickCapture = (e: React.MouseEvent) => {
     if (moved.current) {
@@ -196,7 +201,7 @@ export const MapView = forwardRef<MapHandle, Props>(function MapView({ world, in
 
   return (
     <>
-      <div ref={vpRef} className={`map-viewport${dragging ? ' dragging' : ''}`} onClickCapture={onClickCapture} onClick={onClick} data-testid="map-viewport">
+      <div ref={vpRef} className={`map-viewport${dragging ? ' dragging' : ''}`} onPointerDownCapture={onPointerDownCapture} onClickCapture={onClickCapture} onClick={onClick} data-testid="map-viewport">
         <motion.div className="map-world" style={{ x: tx, y: ty, scale: s, originX: 0, originY: 0, width: world.width, height: world.height }}>
           <img className="base" src={asset(world.base)} width={world.width} height={world.height} alt="" draggable={false} />
           {children}

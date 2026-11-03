@@ -5,6 +5,7 @@ import { useIsDesktop } from '../hooks/useMedia';
 import { Page } from '../components/layout/Page';
 import { BottomNav, TopBar, TopNav } from '../components/layout/Nav';
 import { icon } from '../components/ui/icons';
+import { Item, Stagger } from '../components/ui/Reveal';
 
 /** Placeholder for tabs whose screens are not part of this section ("به‌زودی"). */
 export function ComingSoon() {
@@ -18,18 +19,18 @@ export function ComingSoon() {
   const back = () => (window.history.state?.idx > 0 ? navigate(-1) : navigate(home, { replace: true }));
 
   const content = (
-    <div className="soon" data-testid="coming-soon">
-      <span className="tile" style={{ ['--tile-from' as string]: item.from, ['--tile-to' as string]: item.to, ['--tile-shadow' as string]: item.shadow, width: 72, height: 72, borderRadius: 22 } as React.CSSProperties}>
+    <Stagger className="soon" data-testid="coming-soon" delay={0.1} gap={0.07}>
+      <Item><span className="tile" style={{ ['--tile-from' as string]: item.from, ['--tile-to' as string]: item.to, ['--tile-shadow' as string]: item.shadow, width: 72, height: 72, borderRadius: 22 } as React.CSSProperties}>
         <img className="gloss" src={icon('tileGlossBig')} alt="" style={{ width: 50, height: 22, left: 11, top: 3 }} />
         <img className="glyph" src={icon(item.icon)} alt="" style={{ width: 36, height: 36 }} />
-      </span>
-      <b>{page.title}</b>
-      <span className="pill-chip pill-gold">به‌زودی</span>
-      <span>{page.text}</span>
-      <button className="btn btn-secondary btn-lg" onClick={back} data-testid="soon-back">
+      </span></Item>
+      <Item><b>{page.title}</b></Item>
+      <Item><span className="pill-chip pill-gold">به‌زودی</span></Item>
+      <Item><span>{page.text}</span></Item>
+      <Item><button className="btn btn-secondary btn-lg" onClick={back} data-testid="soon-back">
         بازگشت
-      </button>
-    </div>
+      </button></Item>
+    </Stagger>
   );
 
   return (

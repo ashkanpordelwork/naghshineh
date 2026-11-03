@@ -1,4 +1,15 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+/** true for the first ~1.2s after mount: used to stagger the entrance only once */
+function useEntering() {
+  const [on, setOn] = useState(true);
+  useEffect(() => {
+    const id = window.setTimeout(() => setOn(false), 1200);
+    return () => window.clearTimeout(id);
+  }, []);
+  return on;
+}
 import { asset, stageInfo, type Place, type World } from '../../data';
 
 interface Props {
@@ -11,22 +22,24 @@ interface Props {
 /** Building sprites (one PNG per place) + dashed selection outline. Painter order = data order. */
 export function Sprites({ world, selected, pressed, onSelect }: Props) {
   const reduce = useReducedMotion();
+  const entering = useEntering();
   const sel = world.places.find((p) => p.id === selected);
   return (
     <>
       <AnimatePresence>{sel && <SelectionOutline key={sel.id} place={sel} />}</AnimatePresence>
       {[...world.places]
         .sort((a, b) => a.lot.y - b.lot.y || a.lot.x - b.lot.x)
-        .map((p) => (
+        .map((p, i) => (
           <motion.div
             key={p.id}
             className="sprite"
             data-place={p.id}
             style={{ left: p.box.x, top: p.box.y, width: p.box.w, height: p.box.h }}
-            animate={{ scale: reduce ? 1 : pressed === p.id ? 1.06 : selected === p.id ? 1.03 : 1 }}
+            initial={reduce ? false : { opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0, scale: reduce ? 1 : pressed === p.id ? 1.06 : selected === p.id ? 1.03 : 1 }}
             whileHover={reduce ? undefined : { scale: selected === p.id ? 1.04 : 1.025 }}
             whileTap={reduce ? undefined : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 26, delay: entering ? 0.1 + i * 0.05 : 0 }}
           >
             <img src={asset(p.sprite)} alt="" draggable={false} />
             <button className="sprite-hit" aria-label={p.name} data-testid={`sprite-${p.id}`} onClick={() => onSelect(p)} />
@@ -39,10 +52,11 @@ export function Sprites({ world, selected, pressed, onSelect }: Props) {
 /** HTML name tags, positioned exactly like the Figma "Name Tags" frame. */
 export function Tags({ world, selected, pressed, onSelect }: Props) {
   const reduce = useReducedMotion();
+  const entering = useEntering();
   const k = world.tagScale;
   return (
     <>
-      {world.places.map((p) => {
+      {world.places.map((p, i) => {
         const isSel = selected === p.id;
         const dim = selected && !isSel;
         const progress = p.progress !== undefined;
@@ -53,10 +67,11 @@ export function Tags({ world, selected, pressed, onSelect }: Props) {
             className="tag-wrap"
             data-place={p.id}
             style={{ left: p.tag.x, top: p.tag.y, width: p.tag.w, height: p.pointer.y + p.pointer.h - p.tag.y, zIndex: isSel ? 3 : 2 }}
-            animate={{ opacity: dim ? 0.45 : 1, scale: reduce ? 1 : pressed === p.id ? 1.12 : isSel ? 1.06 : 1 }}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6, y: 8 }}
+            animate={{ opacity: dim ? 0.45 : 1, y: 0, scale: reduce ? 1 : pressed === p.id ? 1.12 : isSel ? 1.06 : 1 }}
             whileHover={reduce ? undefined : { scale: isSel ? 1.08 : 1.05 }}
             whileTap={reduce ? undefined : { scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 28, opacity: { duration: 0.2 } }}
+            transition={{ type: 'spring', stiffness: 420, damping: 24, delay: entering ? 0.35 + i * 0.06 : 0, opacity: { duration: 0.25, delay: entering ? 0.35 + i * 0.06 : 0 } }}
           >
             <button
               className={`tag${progress ? ' with-progress' : ''}${isSel ? ' selected' : ''}`}

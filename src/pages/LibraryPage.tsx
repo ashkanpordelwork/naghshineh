@@ -7,6 +7,7 @@ import { useIsDesktop } from '../hooks/useMedia';
 import { Page } from '../components/layout/Page';
 import { BottomNav, TopBar, TopNav } from '../components/layout/Nav';
 import { Avatar } from '../components/ui/Avatar';
+import { Item, Stagger } from '../components/ui/Reveal';
 import { icon } from '../components/ui/icons';
 import { Leaderboard } from '../components/library/Leaderboard';
 import { CancelDialog, JoinDialog, MessageDialog, ProfileDialog } from '../components/library/Dialogs';
@@ -63,83 +64,85 @@ export function LibraryPage() {
   }, []);
 
   const body = (
-    <div className="lib-body">
-      <button className="back-pill" onClick={backToMap} data-testid="back-pill">
-        <img src={icon('mapPill')} width={16} height={16} alt="" />
-        <span className="school">{schoolInfo.name}</span>
-        <span className="sep" />
-        <span className="back">بازگشت به نقشه</span>
-        <img src={icon('backPill')} width={14} height={14} alt="" />
-      </button>
+    <Stagger className="lib-body" delay={0.08} gap={0.07}>
+      <Item>
+        <button className="back-pill" onClick={backToMap} data-testid="back-pill">
+          <img src={icon('mapPill')} width={16} height={16} alt="" />
+          <span className="school">{schoolInfo.name}</span>
+          <span className="sep" />
+          <span className="back">بازگشت به نقشه</span>
+          <img src={icon('backPill')} width={14} height={14} alt="" style={{ transform: 'scaleX(-1)' }} />
+        </button>
+      </Item>
 
-      <div className="lib-header">
+      <Item className="lib-header">
         <button className="icon-btn" onClick={backToMap} aria-label="بازگشت" data-testid="lib-back">
-          <img src={icon('backIcon')} width={18} height={18} alt="" />
+          <img src={icon('backHeader')} width={18} height={18} alt="" />
         </button>
         <div className="t">
           <b>{library.name}</b>
           <span>{library.subtitle}</span>
         </div>
-      </div>
+      </Item>
 
-      <div className="hero">
-        <img className="shadow" src={icon('heroShadow')} alt="" />
+      <Item className="hero">
+        <motion.img className="shadow" src={icon('heroShadow')} alt="" initial={{ opacity: 0, scaleX: 0.6 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ duration: 0.6, delay: 0.25 }} />
         <motion.img
           className="cell"
           src={asset('assets/map/library-hero@3x.png')}
           alt="ساختمان کتابخانه"
-          initial={reduce ? false : { y: 12, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+          initial={reduce ? false : { y: 22, opacity: 0, scale: 0.92 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 20, delay: 0.2 }}
         />
-      </div>
+      </Item>
 
-      {loading ? (
-        <Skeleton />
-      ) : (
-        <>
-          <StageCard />
-          <ManagerCard onMessage={() => setMsg(true)} />
-
-          <div className="tabs" role="tablist" data-testid="tabs">
-            {(['members', 'history'] as Tab[]).map((t) => (
-              <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => switchTab(t)} data-testid={`tab-${t}`}>
-                {tab === t && <motion.span layoutId="lib-tab" className="ind" transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />}
-                <span>{t === 'members' ? 'اعضای امسال' : 'سوابق'}</span>
-              </button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={tab}
-              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-            >
-              <ScrollRestore tab={tab} />
-              {tab === 'members' ? (
-                <MembersTab onPick={(m, r) => setPick({ m, r, year: library.currentYear })} onJoin={() => setJoin(true)} onCancel={() => setCancel(true)} />
-              ) : (
-                <HistoryTab onPick={(m, r, year) => setPick({ m, r, year })} />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </>
-      )}
-    </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {loading ? (
+          <motion.div key="sk" exit={{ opacity: 0, transition: { duration: 0.18 } }}>
+            <Skeleton />
+          </motion.div>
+        ) : (
+          <Stagger key="content" gap={0.08} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Item>
+              <StageCard />
+            </Item>
+            <Item>
+              <ManagerCard onMessage={() => setMsg(true)} />
+            </Item>
+            <Item className="tabs" role="tablist" data-testid="tabs">
+              {(['members', 'history'] as Tab[]).map((t) => (
+                <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => switchTab(t)} data-testid={`tab-${t}`}>
+                  {tab === t && <motion.span layoutId="lib-tab" className="ind" transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />}
+                  <span>{t === 'members' ? 'اعضای امسال' : 'سوابق'}</span>
+                </button>
+              ))}
+            </Item>
+            <Item>
+              <AnimatePresence mode="wait" initial={false}>
+                <Stagger key={tab} gap={0.07} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} exit={{ opacity: 0, transition: { duration: 0.15 } }}>
+                  <ScrollRestore tab={tab} />
+                  {tab === 'members' ? (
+                    <MembersTab onPick={(m, r) => setPick({ m, r, year: library.currentYear })} onJoin={() => setJoin(true)} onCancel={() => setCancel(true)} />
+                  ) : (
+                    <HistoryTab onPick={(m, r, year) => setPick({ m, r, year })} />
+                  )}
+                </Stagger>
+              </AnimatePresence>
+            </Item>
+          </Stagger>
+        )}
+      </AnimatePresence>
+    </Stagger>
   );
 
   return (
     <Page
       className="page app-bg"
       data-testid="screen-library"
-      initial={{ opacity: 0, x: reduce ? 0 : -24 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: reduce ? 0 : 16 }}
-      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, x: reduce ? 0 : -28 }}
+      animate={{ opacity: 1, x: 0, transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, x: reduce ? 0 : 20, transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }}
     >
       {desktop ? (
         <>
@@ -256,8 +259,13 @@ function MembersTab({ onPick, onJoin, onCancel }: { onPick: (m: Member, r: numbe
   const join = useApp((s) => s.join);
   return (
     <>
-      <SectionTitle title={`جدول امتیاز ${library.currentYear}`} meta={library.updated} bar="#f5c451" />
-      <Leaderboard members={library.members} onPick={onPick} animKey="current" />
+      <Item>
+        <SectionTitle title={`جدول امتیاز ${library.currentYear}`} meta={library.updated} bar="#f5c451" />
+      </Item>
+      <Item>
+        <Leaderboard members={library.members} onPick={onPick} animKey="current" />
+      </Item>
+      <Item>
       <AnimatePresence mode="wait" initial={false}>
         {join.status === 'none' ? (
           <motion.div key="join" className="card join-card" data-testid="join-card" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
@@ -300,15 +308,20 @@ function MembersTab({ onPick, onJoin, onCancel }: { onPick: (m: Member, r: numbe
           </motion.div>
         )}
       </AnimatePresence>
-      <SectionTitle title="فعالیت‌های اخیر" bar="#4da3ff" />
-      <div className="card activity" data-testid="activity">
-        {library.activity.map((a) => (
-          <div className="row" key={a.text}>
-            <b>{a.text}</b>
-            <span style={{ color: a.tone === 'gold' ? '#ffe08a' : '#9af5c3' }}>{a.meta}</span>
-          </div>
-        ))}
-      </div>
+      </Item>
+      <Item>
+        <SectionTitle title="فعالیت‌های اخیر" bar="#4da3ff" />
+      </Item>
+      <Item>
+        <Stagger className="card activity" data-testid="activity" gap={0.08} delay={0.1}>
+          {library.activity.map((a) => (
+            <Item className="row" key={a.text}>
+              <b>{a.text}</b>
+              <span style={{ color: a.tone === 'gold' ? '#ffe08a' : '#9af5c3' }}>{a.meta}</span>
+            </Item>
+          ))}
+        </Stagger>
+      </Item>
     </>
   );
 }
@@ -321,25 +334,26 @@ function HistoryTab({ onPick }: { onPick: (m: Member, r: number, year: string) =
   const head = rec.head ? people[rec.head] : null;
   return (
     <>
-      <div className="years" role="tablist" aria-label="سال تحصیلی" data-testid="years">
+      <Item className="years" role="tablist" aria-label="سال تحصیلی" data-testid="years">
         {library.records.map((r) => (
           <button key={r.id} role="tab" aria-selected={r.id === rec.id} className={`year${r.id === rec.id ? ' on' : ''}`} onClick={() => setYear(r.id)} data-testid={`year-${r.id}`}>
             {r.id === rec.id && <motion.span layoutId="year-ind" className="ind" transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }} />}
             <span>{r.label}</span>
           </button>
         ))}
-      </div>
+      </Item>
+      <Item>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div key={rec.id} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} initial={{ opacity: 0, y: reduce ? 0 : 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+        <Stagger key={rec.id} gap={0.07} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} exit={{ opacity: 0, transition: { duration: 0.15 } }}>
           {rec.members.length === 0 ? (
-            <div className="card empty" data-testid="records-empty">
+            <Item className="card empty" data-testid="records-empty">
               <img src={icon('infoNote')} width={24} height={24} alt="" />
               <b>برای این سال سابقه‌ای ثبت نشده</b>
               <span>کتابخانه از سال تحصیلی ۱۴۰۲ تا ۱۴۰۳ شروع به کار کرده.</span>
-            </div>
+            </Item>
           ) : (
             <>
-              <div className="card year-summary" data-testid="year-summary">
+              <Item className="card year-summary" data-testid="year-summary">
                 <div className="top">
                   {head && <Avatar person={head} size={44} />}
                   <div className="t">
@@ -363,17 +377,22 @@ function HistoryTab({ onPick }: { onPick: (m: Member, r: number, year: string) =
                     <span className="k">نشان گروهی</span>
                   </div>
                 </div>
-              </div>
-              <SectionTitle title={`جدول امتیاز ${rec.label}`} meta={`${fa(rec.members.length)} عضو`} bar="#b07cff" />
-              <Leaderboard members={rec.members} meId={user.id} onPick={(m, r) => onPick(m, r, rec.label)} animKey={rec.id} />
+              </Item>
+              <Item>
+                <SectionTitle title={`جدول امتیاز ${rec.label}`} meta={`${fa(rec.members.length)} عضو`} bar="#b07cff" />
+              </Item>
+              <Item>
+                <Leaderboard members={rec.members} meId={user.id} onPick={(m, r) => onPick(m, r, rec.label)} animKey={rec.id} />
+              </Item>
             </>
           )}
-          <div className="note">
+          <Item className="note">
             <img src={icon('infoNote')} width={16} height={16} alt="" />
             سوابق بعد از پایان هر سال تحصیلی ثابت می‌مونه
-          </div>
-        </motion.div>
+          </Item>
+        </Stagger>
       </AnimatePresence>
+      </Item>
     </>
   );
 }
