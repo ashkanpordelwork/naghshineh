@@ -174,7 +174,7 @@ export const school: World = {
       id: 'library', name: 'کتابخانه', dot: '#e2b54a', stage: 'blooming', progress: 1, enterable: true,
       sprite: 'assets/map/school-library@2x.png', box: { x: 1286, y: 564, w: 164, h: 130 },
       lot: lotSchool(1288.17, 602.24), tag: { x: 1326.76, y: 538.8, w: 78, h: 45 }, pointer: { x: 1370.76, y: 588.8, w: 10, h: 6 },
-      domain: 'حوزه‌ی آموزشی', rolesFilled: 5, rolesTotal: 5, head: 'امیر حسینی', headRole: 'مسئول کتابخانه', icon: 'menu_book',
+      domain: 'حوزه‌ی آموزشی', rolesFilled: 5, rolesTotal: 7, head: 'امیر حسینی', headRole: 'مسئول کتابخانه', icon: 'menu_book',
       description: 'کتابخانه‌ی مدرسه جای امانت کتاب، کتاب‌خوانی گروهی و مسابقه‌های کتاب‌خوانی است.',
     },
     {

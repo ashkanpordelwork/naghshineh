@@ -119,6 +119,7 @@ async function run(label, viewport, opts = {}) {
   await tid('tag-library').click();
   await tid('place-sheet').waitFor();
   ok((await tid('sheet-title').textContent()) === 'کتابخانه', 'sheet shows کتابخانه');
+  ok((await tid('place-sheet').textContent()).includes('۵ از ۷ نقش پر شده'), 'sheet: 5 of 7 roles filled (2 free roles)');
   ok(url().includes('place=library'), 'selection in URL');
   await page.waitForTimeout(400);
   ok((await tid('school-header').count()) === 0, 'school intro card hidden while a place is open');
