@@ -209,8 +209,14 @@ async function run(label, viewport, opts = {}) {
   ok(Math.abs(y - 400) < 60, `members tab restores its own scroll (${y})`);
 
   // ── Step 6: membership request ──
+  await tid('join-guide').scrollIntoViewIfNeeded();
+  const yBefore = await page.evaluate(() => window.scrollY);
   await tid('join-guide').click();
   await tid('join-dialog').waitFor();
+  await page.mouse.move(viewport.width / 2, 120);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(300);
+  ok(await page.evaluate(() => getComputedStyle(document.body).position === 'fixed'), 'page behind the sheet is locked');
   ok((await tid('join-dialog').textContent()).includes('درخواست نقش راهنمای کتاب'), 'form is titled with the tapped role');
   ok((await tid('role-تبلیغات').count()) === 0, 'form shows only that role (no role picker)');
   ok(await tid('join-submit').isDisabled(), 'submit disabled until the reason is written');
@@ -219,6 +225,9 @@ async function run(label, viewport, opts = {}) {
   await tid('join-reason').fill('عاشق کتاب‌خوندنم و می‌خوام کمک کنم');
   ok(!(await tid('join-submit').isDisabled()), 'enabled with role + ≥10 chars');
   await tid('join-submit').click();
+  await page.waitForTimeout(400);
+  const yAfter = await page.evaluate(() => window.scrollY);
+  ok(Math.abs(yAfter - yBefore) < 4, `page scroll position unchanged after the sheet (${yBefore} → ${yAfter})`);
   ok(await toast('درخواست نقش راهنمای کتاب برای امیر حسینی فرستاده شد'), 'toast after request');
   await tid('join-pending').waitFor();
   ok((await tid('join-pending').textContent()).includes('در انتظار تایید امیر حسینی'), 'role card → pending');

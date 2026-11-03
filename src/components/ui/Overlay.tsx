@@ -21,6 +21,12 @@ export function Overlay({ open, onClose, title, children, modal, testId }: Props
   const asModal = modal || desktop;
   const controls = useDragControls();
 
+  // lock the page behind while open (iOS needs position:fixed, overflow alone is ignored)
+  useEffect(() => {
+    if (!open) return;
+    return lockScroll();
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -104,4 +110,21 @@ function Head({ title, onClose }: { title: string; onClose: () => void }) {
       </button>
     </div>
   );
+}
+
+let locks = 0;
+let savedY = 0;
+/** Freeze page scroll; nested overlays share one lock. Returns the unlock function. */
+function lockScroll() {
+  const b = document.body;
+  if (locks++ === 0) {
+    savedY = window.scrollY;
+    Object.assign(b.style, { position: 'fixed', top: `-${savedY}px`, left: '0', right: '0', width: '100%', overflow: 'hidden' });
+  }
+  return () => {
+    if (--locks === 0) {
+      Object.assign(b.style, { position: '', top: '', left: '', right: '', width: '', overflow: '' });
+      window.scrollTo(0, savedY);
+    }
+  };
 }

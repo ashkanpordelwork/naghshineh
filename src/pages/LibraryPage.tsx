@@ -40,7 +40,8 @@ export function LibraryPage() {
   }, [reduce]);
 
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 4);
+    // ignore the jump to 0 while an overlay has locked the page
+    const on = () => document.body.style.position !== 'fixed' && setScrolled(window.scrollY > 4);
     on();
     window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);
